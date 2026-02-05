@@ -33,6 +33,6 @@ public class MixinBlockModelRenderer {
         }
         
         // Greedy culling is applied - this is just a marker
-        // The actual culling happens in shouldRenderFace checks
+        // The actual culling happens in shouldRenderFace check0
     }
 }
