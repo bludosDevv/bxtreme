@@ -16,26 +16,22 @@ public class RenderOptimizer {
         BXtremeConfig config = Main.config.get();
         
         if (!config.aggressiveEntityCulling) {
-            return true; // Let vanilla handle it
+            return true;
         }
         
         Vec3 cameraPos = camera.getPosition();
         double distanceSq = entity.distanceToSqr(cameraPos);
         double maxDistance = config.maxEntityRenderDistance;
         
-        // Don't cull the player or their mount
         Minecraft mc = Minecraft.getInstance();
         if (entity == mc.player || entity == mc.player.getVehicle()) {
             return true;
         }
         
-        // Check distance
         if (distanceSq > maxDistance * maxDistance) {
             return false;
         }
         
-        // Additional culling: check if entity is in camera frustum
-        // This is a simple check - more advanced frustum culling comes in Phase 2
         return true;
     }
     
@@ -54,31 +50,24 @@ public class RenderOptimizer {
     
     /**
      * Calculate optimal chunk render distance based on current FPS
-     * This is dynamic - reduces render distance if FPS drops
      */
     public static int getOptimalRenderDistance(int currentFPS, int configuredDistance) {
         if (currentFPS >= 60) {
-            return configuredDistance; // Use configured distance
+            return configuredDistance;
         } else if (currentFPS >= 30) {
-            return Math.max(2, configuredDistance - 2); // Reduce by 2
+            return Math.max(2, configuredDistance - 2);
         } else if (currentFPS >= 15) {
-            return Math.max(2, configuredDistance - 4); // Reduce by 4
+            return Math.max(2, configuredDistance - 4);
         } else {
-            return 2; // Minimum 2 chunks
+            return 2;
         }
     }
     
     /**
-     * Checks if we should skip tile entity rendering for performance
+     * FIXED: Don't skip tile entity rendering - causes invisible blocks
      */
     public static boolean shouldRenderTileEntity(double distanceSq) {
-        BXtremeConfig config = Main.config.get();
-        
-        if (!config.reduceTileEntityUpdates) {
-            return true;
-        }
-        
-        // Don't render tile entities beyond 32 blocks
-        return distanceSq <= 32 * 32;
+        // Always render tile entities - the invisible block bug was from this
+        return true;
     }
 }
