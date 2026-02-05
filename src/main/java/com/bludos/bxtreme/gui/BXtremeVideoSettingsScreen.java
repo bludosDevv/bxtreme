@@ -238,14 +238,21 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 break;
                 
             case DETAILS:
-                // Clouds
-                int cloudsMode = Minecraft.getInstance().options.cloudStatus().get().getId();
-                String[] cloudsModes = {"Off", "Fast", "Fancy"};
+                // Clouds - FIXED: Use values() instead of byId()
+                net.minecraft.client.CloudStatus currentClouds = Minecraft.getInstance().options.cloudStatus().get();
+                net.minecraft.client.CloudStatus[] cloudValues = net.minecraft.client.CloudStatus.values();
                 addRenderableWidget(Button.builder(
-                    Component.literal("Clouds: §e" + cloudsModes[cloudsMode]),
+                    Component.literal("Clouds: §e" + currentClouds.name()),
                     btn -> {
-                        int newMode = (cloudsMode + 1) % 3;
-                        Minecraft.getInstance().options.cloudStatus().set(net.minecraft.client.CloudStatus.byId(newMode));
+                        int currentIndex = 0;
+                        for (int i = 0; i < cloudValues.length; i++) {
+                            if (cloudValues[i] == currentClouds) {
+                                currentIndex = i;
+                                break;
+                            }
+                        }
+                        net.minecraft.client.CloudStatus nextClouds = cloudValues[(currentIndex + 1) % cloudValues.length];
+                        Minecraft.getInstance().options.cloudStatus().set(nextClouds);
                         currentPreset = 5;
                         this.rebuildWidgets();
                     }
