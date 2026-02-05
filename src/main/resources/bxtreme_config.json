@@ -1,0 +1,15 @@
+{
+  "aggressiveEntityCulling": true,
+  "maxEntityRenderDistance": 32,
+  "reduceTileEntityUpdates": true,
+  "particleLimit": 100,
+  "disableUnnecessaryParticles": true,
+  "showFPSOverlay": true,
+  "showDetailedStats": false,
+  "asyncChunkBuilding": false,
+  "aggressiveOcclusionCulling": false,
+  "ultraLowQualityMode": false,
+  "reduceAnimations": true,
+  "simplifyBlockModels": false,
+  "maxFramerate": 120
+}
