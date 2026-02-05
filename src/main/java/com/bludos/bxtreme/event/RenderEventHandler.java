@@ -2,18 +2,15 @@ package com.bludos.bxtreme.event;
 
 import com.bludos.bxtreme.Main;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 
 public class RenderEventHandler {
     
     private int tickCounter = 0;
-    private int entityCullCounter = 0;
     
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -34,6 +31,7 @@ public class RenderEventHandler {
     public void onRenderTick(TickEvent.RenderTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             forceGraphicsSettings();
+            minimizeGLStateChanges();
         }
         
         if (event.phase == TickEvent.Phase.END && Main.performanceMonitor != null) {
@@ -82,8 +80,31 @@ public class RenderEventHandler {
         // Disable entity shadows
         mc.options.entityShadows().set(false);
         
-        // Disable weather
-        mc.levelRenderer.allChanged();
+        // Disable clouds
+        mc.options.cloudStatus().set(net.minecraft.client.CloudStatus.OFF);
+    }
+    
+    /**
+     * NUCLEAR: Minimize OpenGL state changes for translation layer
+     */
+    private void minimizeGLStateChanges() {
+        Minecraft mc = Minecraft.getInstance();
+        if (!Main.config.get().ultraLowQualityMode) {
+            return;
+        }
+        
+        // Disable ALL shader-based effects
+        mc.options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FAST);
+        mc.gameRenderer.shutdownEffect(); // Kill post-processing
+        
+        // Minimize cloud rendering (expensive draw calls)
+        mc.options.cloudStatus().set(net.minecraft.client.CloudStatus.OFF);
+        
+        // Disable view bobbing (extra matrix calculations)
+        mc.options.bobView().set(false);
+        
+        // Disable distortion effects
+        mc.gameRenderer.checkEntityPostEffect(null);
     }
     
     /**

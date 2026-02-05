@@ -9,7 +9,9 @@
   "client": [
     "MixinMinecraft",
     "MixinParticleEngine",
-    "MixinLevelRenderer"
+    "MixinLevelRenderer",
+    "MixinRenderSystem",
+    "MixinGameRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
