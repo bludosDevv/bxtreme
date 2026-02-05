@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.bludos.bxtreme.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "bxtreme.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "MixinLevelRenderer",
+    "MixinParticleEngine",
+    "MixinEntity",
+    "MixinMinecraft",
+    "MixinChunkRenderDispatcher"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

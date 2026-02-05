@@ -9,19 +9,20 @@ displayName="BXtreme Performance"
 description='''
 Extreme FPS optimization for low-end Android devices.
 Maximum performance, zero compromises.
+Phase 2: Mixin-based optimizations active.
 '''
 authors="Bludos"
 
 [[dependencies.bxtreme]]
-modId="forge"
-mandatory=true
-versionRange="[47,)"
-ordering="NONE"
-side="BOTH"
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
 
 [[dependencies.bxtreme]]
-modId="minecraft"
-mandatory=true
-versionRange="[1.20.1]"
-ordering="NONE"
-side="BOTH"
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1]"
+    ordering="NONE"
+    side="BOTH"
