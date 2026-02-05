@@ -60,10 +60,11 @@ public class BXtremeVideoSettingsScreen extends Screen {
         
         for (Category cat : Category.values()) {
             boolean selected = (cat == currentCategory);
+            final Category finalCat = cat;
             addRenderableWidget(Button.builder(
                 Component.literal((selected ? "§e§l> " : "§7") + cat.name),
                 btn -> {
-                    currentCategory = cat;
+                    currentCategory = finalCat;
                     this.rebuildWidgets();
                 }
             ).bounds(5, categoryY, leftPanelWidth, 20).build());
@@ -103,295 +104,262 @@ public class BXtremeVideoSettingsScreen extends Screen {
         switch (currentCategory) {
             case PERFORMANCE:
                 // Render Distance
-                addRenderableWidget(createSlider(
-                    "Render Distance",
-                    startX, y, buttonWidth,
-                    2, 32, Minecraft.getInstance().options.renderDistance().get(),
-                    val -> {
-                        Minecraft.getInstance().options.renderDistance().set(val);
-                        currentPreset = 5; // Set to CUSTOM
+                int renderDist = Minecraft.getInstance().options.renderDistance().get();
+                addRenderableWidget(Button.builder(
+                    Component.literal("Render Distance: §e" + renderDist),
+                    btn -> {
+                        int newVal = (renderDist % 32) + 2;
+                        Minecraft.getInstance().options.renderDistance().set(newVal);
+                        currentPreset = 5;
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Chunk Updates Per Frame
-                addRenderableWidget(createSlider(
-                    "Chunk Updates/Frame",
-                    startX, y, buttonWidth,
-                    1, 10, config.chunkUpdateBudget,
-                    val -> {
-                        config.chunkUpdateBudget = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Chunk Updates/Frame: §e" + config.chunkUpdateBudget),
+                    btn -> {
+                        config.chunkUpdateBudget = (config.chunkUpdateBudget % 10) + 1;
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Entity Distance
-                addRenderableWidget(createSlider(
-                    "Entity Distance",
-                    startX, y, buttonWidth,
-                    8, 128, config.maxEntityRenderDistance,
-                    val -> {
-                        config.maxEntityRenderDistance = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Entity Distance: §e" + config.maxEntityRenderDistance),
+                    btn -> {
+                        int[] distances = {16, 24, 32, 48, 64, 96, 128};
+                        int current = 0;
+                        for (int i = 0; i < distances.length; i++) {
+                            if (distances[i] == config.maxEntityRenderDistance) {
+                                current = i;
+                                break;
+                            }
+                        }
+                        config.maxEntityRenderDistance = distances[(current + 1) % distances.length];
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Max FPS
-                addRenderableWidget(createSlider(
-                    "Max Framerate",
-                    startX, y, buttonWidth,
-                    30, 300, config.maxFramerate,
-                    val -> {
-                        config.maxFramerate = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Max Framerate: §e" + config.maxFramerate),
+                    btn -> {
+                        int[] fps = {30, 60, 90, 120, 144, 240, 300};
+                        int current = 0;
+                        for (int i = 0; i < fps.length; i++) {
+                            if (fps[i] == config.maxFramerate) {
+                                current = i;
+                                break;
+                            }
+                        }
+                        config.maxFramerate = fps[(current + 1) % fps.length];
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Async Chunk Building
-                addRenderableWidget(createToggle(
-                    "Async Chunk Building",
-                    startX, y, buttonWidth,
-                    config.asyncChunkBuilding,
-                    val -> {
-                        config.asyncChunkBuilding = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Async Chunk Building: " + (config.asyncChunkBuilding ? "§aON" : "§cOFF")),
+                    btn -> {
+                        config.asyncChunkBuilding = !config.asyncChunkBuilding;
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 break;
                 
             case QUALITY:
                 // Graphics Quality
-                addRenderableWidget(createCycleButton(
-                    "Graphics",
-                    startX, y, buttonWidth,
-                    new String[]{"Fast", "Fancy", "Fabulous"},
-                    getGraphicsIndex(),
-                    val -> {
-                        setGraphicsMode(val);
+                int graphicsMode = Minecraft.getInstance().options.graphicsMode().get().getId();
+                String[] graphicsModes = {"Fast", "Fancy", "Fabulous"};
+                addRenderableWidget(Button.builder(
+                    Component.literal("Graphics: §e" + graphicsModes[graphicsMode]),
+                    btn -> {
+                        int newMode = (graphicsMode + 1) % 3;
+                        Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.byId(newMode));
                         currentPreset = 5;
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Smooth Lighting
-                addRenderableWidget(createToggle(
-                    "Smooth Lighting",
-                    startX, y, buttonWidth,
-                    !config.disableSmoothLighting,
-                    val -> {
-                        config.disableSmoothLighting = !val;
-                        Minecraft.getInstance().options.ambientOcclusion().set(val);
+                boolean smoothLighting = !config.disableSmoothLighting;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Smooth Lighting: " + (smoothLighting ? "§aON" : "§cOFF")),
+                    btn -> {
+                        config.disableSmoothLighting = !config.disableSmoothLighting;
+                        Minecraft.getInstance().options.ambientOcclusion().set(!config.disableSmoothLighting);
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Greedy Meshing
-                addRenderableWidget(createToggle(
-                    "Greedy Meshing §7(Bedrock-style)",
-                    startX, y, buttonWidth,
-                    config.simplifyBlockModels,
-                    val -> {
-                        config.simplifyBlockModels = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Greedy Meshing §7(Bedrock-style): " + (config.simplifyBlockModels ? "§aON" : "§cOFF")),
+                    btn -> {
+                        config.simplifyBlockModels = !config.simplifyBlockModels;
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Ultra Low Quality Mode
-                addRenderableWidget(createToggle(
-                    "Ultra Low Quality Mode",
-                    startX, y, buttonWidth,
-                    config.ultraLowQualityMode,
-                    val -> {
-                        config.ultraLowQualityMode = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Ultra Low Quality Mode: " + (config.ultraLowQualityMode ? "§aON" : "§cOFF")),
+                    btn -> {
+                        config.ultraLowQualityMode = !config.ultraLowQualityMode;
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 break;
                 
             case DETAILS:
                 // Clouds
-                addRenderableWidget(createCycleButton(
-                    "Clouds",
-                    startX, y, buttonWidth,
-                    new String[]{"Off", "Fast", "Fancy"},
-                    getCloudsIndex(),
-                    val -> {
-                        setCloudsMode(val);
+                int cloudsMode = Minecraft.getInstance().options.cloudStatus().get().getId();
+                String[] cloudsModes = {"Off", "Fast", "Fancy"};
+                addRenderableWidget(Button.builder(
+                    Component.literal("Clouds: §e" + cloudsModes[cloudsMode]),
+                    btn -> {
+                        int newMode = (cloudsMode + 1) % 3;
+                        Minecraft.getInstance().options.cloudStatus().set(net.minecraft.client.CloudStatus.byId(newMode));
                         currentPreset = 5;
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Particles
-                addRenderableWidget(createSlider(
-                    "Particle Limit",
-                    startX, y, buttonWidth,
-                    10, 4000, config.particleLimit,
-                    val -> {
-                        config.particleLimit = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Particle Limit: §e" + config.particleLimit),
+                    btn -> {
+                        int[] limits = {10, 50, 100, 250, 500, 1000, 2000, 4000};
+                        int current = 0;
+                        for (int i = 0; i < limits.length; i++) {
+                            if (limits[i] == config.particleLimit) {
+                                current = i;
+                                break;
+                            }
+                        }
+                        config.particleLimit = limits[(current + 1) % limits.length];
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Entity Shadows
-                addRenderableWidget(createToggle(
-                    "Entity Shadows",
-                    startX, y, buttonWidth,
-                    Minecraft.getInstance().options.entityShadows().get(),
-                    val -> {
-                        Minecraft.getInstance().options.entityShadows().set(val);
+                boolean entityShadows = Minecraft.getInstance().options.entityShadows().get();
+                addRenderableWidget(Button.builder(
+                    Component.literal("Entity Shadows: " + (entityShadows ? "§aON" : "§cOFF")),
+                    btn -> {
+                        Minecraft.getInstance().options.entityShadows().set(!entityShadows);
                         currentPreset = 5;
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 break;
                 
             case ANIMATIONS:
                 // View Bobbing
-                addRenderableWidget(createToggle(
-                    "View Bobbing",
-                    startX, y, buttonWidth,
-                    Minecraft.getInstance().options.bobView().get(),
-                    val -> {
-                        Minecraft.getInstance().options.bobView().set(val);
+                boolean viewBobbing = Minecraft.getInstance().options.bobView().get();
+                addRenderableWidget(Button.builder(
+                    Component.literal("View Bobbing: " + (viewBobbing ? "§aON" : "§cOFF")),
+                    btn -> {
+                        Minecraft.getInstance().options.bobView().set(!viewBobbing);
                         currentPreset = 5;
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Reduce Animations
-                addRenderableWidget(createToggle(
-                    "Reduce Animations",
-                    startX, y, buttonWidth,
-                    config.reduceAnimations,
-                    val -> {
-                        config.reduceAnimations = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Reduce Animations: " + (config.reduceAnimations ? "§aON" : "§cOFF")),
+                    btn -> {
+                        config.reduceAnimations = !config.reduceAnimations;
                         currentPreset = 5;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 break;
                 
             case OTHER:
                 // FPS Overlay
-                addRenderableWidget(createToggle(
-                    "Show FPS Overlay",
-                    startX, y, buttonWidth,
-                    config.showFPSOverlay,
-                    val -> {
-                        config.showFPSOverlay = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Show FPS Overlay: " + (config.showFPSOverlay ? "§aON" : "§cOFF")),
+                    btn -> {
+                        config.showFPSOverlay = !config.showFPSOverlay;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Detailed Stats
-                addRenderableWidget(createToggle(
-                    "Show Detailed Stats",
-                    startX, y, buttonWidth,
-                    config.showDetailedStats,
-                    val -> {
-                        config.showDetailedStats = val;
+                addRenderableWidget(Button.builder(
+                    Component.literal("Show Detailed Stats: " + (config.showDetailedStats ? "§aON" : "§cOFF")),
+                    btn -> {
+                        config.showDetailedStats = !config.showDetailedStats;
                         Main.config.save();
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // Fullscreen
-                addRenderableWidget(createToggle(
-                    "Fullscreen",
-                    startX, y, buttonWidth,
-                    Minecraft.getInstance().options.fullscreen().get(),
-                    val -> {
-                        Minecraft.getInstance().options.fullscreen().set(val);
+                boolean fullscreen = Minecraft.getInstance().options.fullscreen().get();
+                addRenderableWidget(Button.builder(
+                    Component.literal("Fullscreen: " + (fullscreen ? "§aON" : "§cOFF")),
+                    btn -> {
+                        Minecraft.getInstance().options.fullscreen().set(!fullscreen);
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 // VSync
-                addRenderableWidget(createToggle(
-                    "VSync",
-                    startX, y, buttonWidth,
-                    Minecraft.getInstance().options.enableVsync().get(),
-                    val -> {
-                        Minecraft.getInstance().options.enableVsync().set(val);
+                boolean vsync = Minecraft.getInstance().options.enableVsync().get();
+                addRenderableWidget(Button.builder(
+                    Component.literal("VSync: " + (vsync ? "§aON" : "§cOFF")),
+                    btn -> {
+                        Minecraft.getInstance().options.enableVsync().set(!vsync);
+                        this.rebuildWidgets();
                     }
-                ));
+                ).bounds(startX, y, buttonWidth, 20).build());
                 y += spacing;
                 
                 break;
         }
-    }
-    
-    // Helper methods for creating UI elements
-    private Button createSlider(String label, int x, int y, int width, int min, int max, int current, java.util.function.Consumer<Integer> onChange) {
-        return Button.builder(
-            Component.literal(label + ": §e" + current),
-            btn -> {
-                int newVal = current + 1;
-                if (newVal > max) newVal = min;
-                onChange.accept(newVal);
-                this.rebuildWidgets();
-            }
-        ).bounds(x, y, width, 20).build();
-    }
-    
-    private Button createToggle(String label, int x, int y, int width, boolean current, java.util.function.Consumer<Boolean> onChange) {
-        return Button.builder(
-            Component.literal(label + ": " + (current ? "§aON" : "§cOFF")),
-            btn -> {
-                onChange.accept(!current);
-                this.rebuildWidgets();
-            }
-        ).bounds(x, y, width, 20).build();
-    }
-    
-    private Button createCycleButton(String label, int x, int y, int width, String[] options, int current, java.util.function.Consumer<Integer> onChange) {
-        return Button.builder(
-            Component.literal(label + ": §e" + options[current]),
-            btn -> {
-                int newVal = (current + 1) % options.length;
-                onChange.accept(newVal);
-                this.rebuildWidgets();
-            }
-        ).bounds(x, y, width, 20).build();
-    }
-    
-    private int getGraphicsIndex() {
-        return Minecraft.getInstance().options.graphicsMode().get().getId();
-    }
-    
-    private void setGraphicsMode(int index) {
-        Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.byId(index));
-    }
-    
-    private int getCloudsIndex() {
-        return Minecraft.getInstance().options.cloudStatus().get().getId();
-    }
-    
-    private void setCloudsMode(int index) {
-        Minecraft.getInstance().options.cloudStatus().set(net.minecraft.client.CloudStatus.byId(index));
     }
     
     private void applyPreset(int preset) {
@@ -500,3 +468,4 @@ public class BXtremeVideoSettingsScreen extends Screen {
         Main.config.save();
         this.minecraft.setScreen(lastScreen);
     }
+}
