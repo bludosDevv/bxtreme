@@ -3,6 +3,7 @@ package com.bludos.bxtreme.mixin;
 import com.bludos.bxtreme.Main;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,9 +32,15 @@ public class MixinBlockEntityRenderDispatcher {
         }
         
         Vec3 playerPos = mc.player.position();
-        double distanceSq = blockEntity.getBlockPos().distSqr(playerPos.x, playerPos.y, playerPos.z, true);
+        BlockPos blockPos = blockEntity.getBlockPos();
         
-        // Don't render tile entities beyond 24 blocks (configurable later)
+        // Calculate distance squared
+        double dx = blockPos.getX() - playerPos.x;
+        double dy = blockPos.getY() - playerPos.y;
+        double dz = blockPos.getZ() - playerPos.z;
+        double distanceSq = dx * dx + dy * dy + dz * dz;
+        
+        // Don't render tile entities beyond 24 blocks
         if (distanceSq > 24 * 24) {
             ci.cancel();
         }
