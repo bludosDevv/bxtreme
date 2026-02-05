@@ -1,6 +1,7 @@
 package com.bludos.bxtreme.mixin;
 
 import com.bludos.bxtreme.Main;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
@@ -19,7 +20,9 @@ public class MixinBlockEntityRenderDispatcher {
      * These are SUPER expensive on mobile
      */
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void skipDistantTileEntities(BlockEntity blockEntity, float partialTick, 
+    private void skipDistantTileEntities(BlockEntity blockEntity, 
+                                        float partialTick, 
+                                        PoseStack poseStack,
                                         net.minecraft.client.renderer.MultiBufferSource bufferSource,
                                         CallbackInfo ci) {
         if (!Main.config.get().reduceTileEntityUpdates) {
