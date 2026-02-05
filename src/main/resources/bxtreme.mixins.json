@@ -14,7 +14,7 @@
     "MixinGameRenderer",
     "MixinChunkBufferBuilderPack",
     "MixinChunkRenderDispatcher",
-    "MixinVideoSettingsScreen"
+    "MixinOptionsScreen"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,39 +1,39 @@
 package com.bludos.bxtreme.config;
 
 public class BXtremeConfig {
-    // NUCLEAR Entity Rendering
+    // Entity Rendering
     public boolean aggressiveEntityCulling = true;
-    public int maxEntityRenderDistance = 20; // EVEN LOWER for translation overhead
-    public boolean reduceTileEntityUpdates = true;
+    public int maxEntityRenderDistance = 24; // Safe default
+    public boolean reduceTileEntityUpdates = false; // DISABLED - causes invisible blocks
     
-    // NUCLEAR Particle System
-    public int particleLimit = 10; // ONLY 10 PARTICLES (vanilla: 4000)
+    // Particle System
+    public int particleLimit = 50; // Reasonable default
     public boolean disableUnnecessaryParticles = true;
     
     // Performance Monitor
     public boolean showFPSOverlay = true;
-    public boolean showDetailedStats = true;
+    public boolean showDetailedStats = false;
     
-    // NUCLEAR OPTIONS - OPTIMIZED FOR TRANSLATION LAYER
-    public boolean asyncChunkBuilding = true;
-    public boolean aggressiveOcclusionCulling = true;
-    public boolean ultraLowQualityMode = true;
+    // Experimental - ALL DISABLED BY DEFAULT
+    public boolean asyncChunkBuilding = false;
+    public boolean aggressiveOcclusionCulling = false;
+    public boolean ultraLowQualityMode = false; // DISABLED - causes bugs
     
-    // NUCLEAR Mobile Optimizations
-    public boolean reduceAnimations = true;
-    public boolean simplifyBlockModels = true;
-    public int maxFramerate = 60;
+    // Mobile Optimizations
+    public boolean reduceAnimations = false;
+    public boolean simplifyBlockModels = false;
+    public int maxFramerate = 90;
     
-    // NUCLEAR Rendering - TRANSLATION LAYER OPTIMIZED
-    public int chunkUpdateBudget = 1; // Minimize state changes
+    // Rendering
+    public int chunkUpdateBudget = 2; // Safe default
     public boolean skipBackfaceCulling = false;
-    public boolean disableSmoothLighting = true;
-    public boolean disableFancyGraphics = true;
-    public int entityTickDistance = 2;
+    public boolean disableSmoothLighting = false;
+    public boolean disableFancyGraphics = false;
+    public int entityTickDistance = 4;
     
-    // NEW: Translation Layer Optimizations
-    public boolean disableFog = true; // Shader complexity killer
-    public boolean disablePostProcessing = true; // Framebuffer overhead killer
-    public boolean disableEntityShaders = true; // Creeper glow, spider eyes, etc
-    public boolean minimizeTextureBinds = true; // Reduce GL state changes
+    // Translation Layer Optimizations
+    public boolean disableFog = false;
+    public boolean disablePostProcessing = false;
+    public boolean disableEntityShaders = false;
+    public boolean minimizeTextureBinds = false;
 }
