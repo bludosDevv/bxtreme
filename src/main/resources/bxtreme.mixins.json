@@ -14,7 +14,8 @@
     "MixinGameRenderer",
     "MixinChunkBufferBuilderPack",
     "MixinChunkRenderDispatcher",
-    "MixinBlockModelRenderer"
+    "MixinBlockModelRenderer",
+    "MixinOptionsScreen"
   ],
   "injectors": {
     "defaultRequire": 1
