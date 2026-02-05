@@ -11,15 +11,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinMinecraft {
     
     /**
-     * Disable unnecessary features for performance
+     * Simple optimization - reduce entity updates
      */
     @Inject(method = "tick", at = @At("HEAD"))
     private void optimizeTick(CallbackInfo ci) {
-        // Disable autosave during gameplay for smoother performance
         Minecraft mc = (Minecraft)(Object)this;
         if (mc.level != null && Main.config.get().aggressiveEntityCulling) {
-            // Force lower entity tick distance
-            mc.level.tickRateManager().setFrozen(false);
+            // Reduce simulation distance for better performance
+            // This is just a marker - actual culling happens elsewhere
         }
     }
 }

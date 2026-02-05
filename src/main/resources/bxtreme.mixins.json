@@ -11,7 +11,10 @@
     "MixinParticleEngine",
     "MixinLevelRenderer",
     "MixinRenderSystem",
-    "MixinGameRenderer"
+    "MixinGameRenderer",
+    "MixinChunkBufferBuilderPack",
+    "MixinChunkRenderDispatcher",
+    "MixinBlockModelRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
