@@ -2,6 +2,7 @@ package com.bludos.bxtreme.event;
 
 import com.bludos.bxtreme.Main;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -10,6 +11,8 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 public class RenderEventHandler {
     
     private int tickCounter = 0;
+    private int fpsCheckCounter = 0;
+    private int lowFpsStreak = 0;
     
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -18,11 +21,18 @@ public class RenderEventHandler {
         }
         
         tickCounter++;
+        fpsCheckCounter++;
         
         // Every 20 ticks (1 second), perform cleanup
         if (tickCounter >= 20) {
             tickCounter = 0;
             performPeriodicOptimizations();
+        }
+        
+        // Every 60 ticks (3 seconds), check FPS and adjust render distance
+        if (fpsCheckCounter >= 60) {
+            fpsCheckCounter = 0;
+            adjustRenderDistanceBasedOnFPS();
         }
     }
     
@@ -42,16 +52,49 @@ public class RenderEventHandler {
     
     @SubscribeEvent
     public void onRenderLevelStage(RenderLevelStageEvent event) {
-        // This is where we'll hook into chunk rendering in Phase 2
-        // For now, we just track what's being rendered
-        
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level != null && Main.performanceMonitor != null) {
-                // Update performance stats
                 int entityCount = mc.level.getEntityCount();
                 Main.performanceMonitor.setEntitiesRendered(entityCount);
             }
+        }
+    }
+    
+    /**
+     * CRITICAL: Dynamic render distance adjustment
+     * Automatically reduces chunks if FPS drops
+     */
+    private void adjustRenderDistanceBasedOnFPS() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || Main.performanceMonitor == null) {
+            return;
+        }
+        
+        int currentFPS = Main.performanceMonitor.getFPS();
+        Options options = mc.options;
+        int currentRenderDistance = options.renderDistance().get();
+        
+        // If FPS is consistently below 50, reduce render distance
+        if (currentFPS < 50) {
+            lowFpsStreak++;
+            
+            if (lowFpsStreak >= 3 && currentRenderDistance > 4) {
+                options.renderDistance().set(currentRenderDistance - 1);
+                Main.LOGGER.info("Low FPS detected, reducing render distance to " + (currentRenderDistance - 1));
+                lowFpsStreak = 0;
+            }
+        } else if (currentFPS > 70) {
+            // FPS is good, can increase render distance if it was reduced
+            lowFpsStreak = 0;
+            
+            int maxRenderDistance = 8; // Cap at 8 chunks for mobile
+            if (currentRenderDistance < maxRenderDistance) {
+                options.renderDistance().set(currentRenderDistance + 1);
+                Main.LOGGER.info("Good FPS, increasing render distance to " + (currentRenderDistance + 1));
+            }
+        } else {
+            lowFpsStreak = 0; // Reset streak if FPS is between 50-70
         }
     }
     
@@ -62,8 +105,7 @@ public class RenderEventHandler {
             return;
         }
         
-        // Suggest garbage collection on low-end devices to prevent stutters
-        // Only do this if we're configured for aggressive optimization
+        // Aggressive GC for low memory situations
         if (Main.config.get().aggressiveEntityCulling) {
             Runtime runtime = Runtime.getRuntime();
             long freeMemory = runtime.freeMemory();
@@ -74,5 +116,3 @@ public class RenderEventHandler {
                 System.gc();
             }
         }
-    }
-}

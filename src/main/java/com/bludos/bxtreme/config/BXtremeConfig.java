@@ -6,8 +6,8 @@ public class BXtremeConfig {
     public int maxEntityRenderDistance = 32; // blocks (vanilla: 64+)
     public boolean reduceTileEntityUpdates = true;
     
-    // Particle System
-    public int particleLimit = 100; // max particles (vanilla: 4000)
+    // Particle System - REDUCED FOR MOBILE
+    public int particleLimit = 50; // REDUCED from 100 (vanilla: 4000)
     public boolean disableUnnecessaryParticles = true;
     
     // Performance Monitor
@@ -22,5 +22,9 @@ public class BXtremeConfig {
     // Mobile Optimizations
     public boolean reduceAnimations = true;
     public boolean simplifyBlockModels = false;
-    public int maxFramerate = 120; // cap to prevent battery drain
+    public int maxFramerate = 90; // REDUCED from 120 - better battery life
+    
+    // NEW: Chunk rendering optimization
+    public int chunkUpdateBudget = 2; // Max chunk updates per frame
+    public boolean skipBackfaceCulling = false; // Phase 3 feature
 }

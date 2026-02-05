@@ -11,7 +11,8 @@
     "MixinParticleEngine",
     "MixinEntity",
     "MixinMinecraft",
-    "MixinChunkRenderDispatcher"
+    "MixinBlockEntityRenderDispatcher",
+    "MixinCamera"
   ],
   "injectors": {
     "defaultRequire": 1
