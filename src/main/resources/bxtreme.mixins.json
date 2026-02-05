@@ -7,12 +7,9 @@
   "mixins": [
   ],
   "client": [
-    "MixinLevelRenderer",
-    "MixinParticleEngine",
-    "MixinEntity",
     "MixinMinecraft",
-    "MixinBlockEntityRenderDispatcher",
-    "MixinCamera"
+    "MixinParticleEngine",
+    "MixinLevelRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

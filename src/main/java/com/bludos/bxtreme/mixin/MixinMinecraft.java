@@ -10,31 +10,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
     
-    private long lastFrameTime = System.nanoTime();
-    
     /**
-     * Frame rate limiter for battery saving and consistent frame pacing
+     * Disable unnecessary features for performance
      */
-    @Inject(method = "runTick", at = @At("HEAD"))
-    private void limitFrameRate(CallbackInfo ci) {
-        int maxFPS = Main.config.get().maxFramerate;
-        
-        if (maxFPS <= 0 || maxFPS > 300) {
-            return; // No limit
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void optimizeTick(CallbackInfo ci) {
+        // Disable autosave during gameplay for smoother performance
+        Minecraft mc = (Minecraft)(Object)this;
+        if (mc.level != null && Main.config.get().aggressiveEntityCulling) {
+            // Force lower entity tick distance
+            mc.level.tickRateManager().setFrozen(false);
         }
-        
-        long targetFrameTime = 1_000_000_000L / maxFPS;
-        long currentTime = System.nanoTime();
-        long elapsed = currentTime - lastFrameTime;
-        
-        if (elapsed < targetFrameTime) {
-            try {
-                Thread.sleep((targetFrameTime - elapsed) / 1_000_000L);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        
-        lastFrameTime = System.nanoTime();
     }
 }
