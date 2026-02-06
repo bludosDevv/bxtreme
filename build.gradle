@@ -68,12 +68,16 @@ repositories {
     maven {
         url 'https://repo.spongepowered.org/repository/maven-public/'
     }
+    maven { url 'https://maven.google.com' }
     mavenCentral()
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation 'com.google.android.filament:filament-android:1.51.5'
+    implementation 'com.google.android.filament:gltfio-android:1.51.5'
+    implementation 'com.google.android.filament:filament-utils-android:1.51.5'
 }
 
 tasks.named('processResources', ProcessResources).configure {

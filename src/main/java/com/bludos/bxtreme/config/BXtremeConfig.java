@@ -1,60 +1,60 @@
 package com.bludos.bxtreme.config;
 
-import com.bludos.bxtreme.render.PostProcessingConfig;
-
 public class BXtremeConfig {
     // Entity Rendering
     public boolean aggressiveEntityCulling = true;
-    public int maxEntityRenderDistance = 24;
+    public int maxEntityRenderDistance = 32;
     public boolean reduceTileEntityUpdates = false;
     
     // Particle System
-    public int particleLimit = 50;
+    public int particleLimit = 100;
     public boolean disableUnnecessaryParticles = true;
     
     // Performance Monitor
     public boolean showFPSOverlay = true;
     public boolean showDetailedStats = false;
-    public boolean showMemoryUsage = true; // NEW
     
-    // Greedy Meshing System
-    public boolean enableGreedyMeshing = true;
+    // Greedy Meshing
+    public boolean enableGreedyMeshing = false;
     public int greedyMeshMaxSize = 16;
-    public boolean aggressiveFaceCulling = true;
-    
-    // Dynamic Render Distance (NEW)
-    public boolean enableDynamicRenderDistance = true;
-    public int minDynamicRenderDistance = 2;
-    public int maxDynamicRenderDistance = 12;
-    
-    // Memory Management (NEW)
-    public boolean enableSmartGC = true;
-    public int gcMemoryThreshold = 80; // Percentage
-    public boolean aggressiveMemoryCleanup = true;
-    
-    // Experimental
-    public boolean asyncChunkBuilding = false;
-    public boolean aggressiveOcclusionCulling = false;
-    public boolean ultraLowQualityMode = false;
+    public boolean aggressiveFaceCulling = false;
     
     // Mobile Optimizations
     public boolean reduceAnimations = false;
     public boolean simplifyBlockModels = false;
-    public int maxFramerate = 90;
+    public int maxFramerate = 144;
     
     // Rendering
-    public int chunkUpdateBudget = 2;
-    public boolean skipBackfaceCulling = false;
+    public int chunkUpdateBudget = 3;
     public boolean disableSmoothLighting = false;
-    public boolean disableFancyGraphics = false;
-    public int entityTickDistance = 4;
+    public int entityTickDistance = 5;
     
-    // Translation Layer Optimizations
-    public boolean disableFog = false;
-    public boolean disablePostProcessing = false;
-    public boolean disableEntityShaders = false;
-    public boolean minimizeTextureBinds = false;
+    // === FILAMENT POST-PROCESSING ===
     
-    // Custom Post-Processing (NEW)
-    public PostProcessingConfig postProcessing = new PostProcessingConfig();
+    // General
+    public boolean enableFilament = true;
+    public boolean filamentPostProcessing = true;
+    
+    // Bloom
+    public boolean bloomEnabled = false;
+    public int bloomStrength = 10; // 0-100
+    
+    // Ambient Occlusion
+    public boolean ambientOcclusionEnabled = true;
+    public int aoQuality = 1; // 0=Low, 1=Medium, 2=High
+    
+    // Depth of Field
+    public boolean depthOfFieldEnabled = false;
+    public int dofFocusDistance = 10; // blocks
+    public int dofBlurAmount = 50; // 0-100
+    
+    // Anti-Aliasing
+    public int antiAliasing = 1; // 0=None, 1=FXAA, 2=MSAA
+    
+    // Shadow Quality
+    public int shadowQuality = 1; // 0=Off, 1=Low, 2=Medium, 3=High
+    
+    // Dynamic Resolution (maintains FPS)
+    public boolean dynamicResolution = true;
+    public int minResolutionScale = 50; // 50-100%
 }
