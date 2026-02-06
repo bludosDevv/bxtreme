@@ -1,5 +1,7 @@
 package com.bludos.bxtreme.config;
 
+import com.bludos.bxtreme.render.PostProcessingConfig;
+
 public class BXtremeConfig {
     // Entity Rendering
     public boolean aggressiveEntityCulling = true;
@@ -13,11 +15,22 @@ public class BXtremeConfig {
     // Performance Monitor
     public boolean showFPSOverlay = true;
     public boolean showDetailedStats = false;
+    public boolean showMemoryUsage = true; // NEW
     
     // Greedy Meshing System
-    public boolean enableGreedyMeshing = true; // NEW: Enable bedrock-style meshing
-    public int greedyMeshMaxSize = 16; // NEW: Maximum quad size (16x16 blocks)
-    public boolean aggressiveFaceCulling = true; // NEW: Cull internal faces
+    public boolean enableGreedyMeshing = true;
+    public int greedyMeshMaxSize = 16;
+    public boolean aggressiveFaceCulling = true;
+    
+    // Dynamic Render Distance (NEW)
+    public boolean enableDynamicRenderDistance = true;
+    public int minDynamicRenderDistance = 2;
+    public int maxDynamicRenderDistance = 12;
+    
+    // Memory Management (NEW)
+    public boolean enableSmartGC = true;
+    public int gcMemoryThreshold = 80; // Percentage
+    public boolean aggressiveMemoryCleanup = true;
     
     // Experimental
     public boolean asyncChunkBuilding = false;
@@ -41,4 +54,7 @@ public class BXtremeConfig {
     public boolean disablePostProcessing = false;
     public boolean disableEntityShaders = false;
     public boolean minimizeTextureBinds = false;
+    
+    // Custom Post-Processing (NEW)
+    public PostProcessingConfig postProcessing = new PostProcessingConfig();
 }

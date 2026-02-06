@@ -9,9 +9,7 @@ public class PerformanceMonitor {
     private long lastTime = System.nanoTime();
     private int frames = 0;
     private int fps = 0;
-    private long lastMemory = 0;
     
-    // Performance tracking
     private int entitiesRendered = 0;
     private int particlesActive = 0;
     private int chunksRendered = 0;
@@ -20,14 +18,22 @@ public class PerformanceMonitor {
         frames++;
         long currentTime = System.nanoTime();
         
-        if (currentTime - lastTime >= 1_000_000_000L) { // 1 second
+        if (currentTime - lastTime >= 1_000_000_000L) {
             fps = frames;
             frames = 0;
             lastTime = currentTime;
             
-            // Update memory info
-            Runtime runtime = Runtime.getRuntime();
-            lastMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024; // MB
+            // Check if we should do GC
+            if (Main.config.get().enableSmartGC && MemoryManager.shouldPerformGC()) {
+                MemoryManager.performOptimizedGC();
+            }
+            
+            // Update render distance optimizer
+            if (Minecraft.getInstance().player != null) {
+                double speed = Minecraft.getInstance().player.getDeltaMovement().length();
+                RenderDistanceOptimizer.updateMovementState(speed);
+                RenderDistanceOptimizer.optimizeRenderDistance(fps);
+            }
         }
     }
     
@@ -48,8 +54,12 @@ public class PerformanceMonitor {
         
         if (Main.config.get().showDetailedStats) {
             // Memory
-            graphics.drawString(font, "Mem: " + lastMemory + "MB", 2, y, 0xAAAAAA, false);
-            y += 10;
+            if (Main.config.get().showMemoryUsage) {
+                String memInfo = MemoryManager.getMemoryInfo();
+                int memColor = getMemoryColor(MemoryManager.getMemoryUsagePercent());
+                graphics.drawString(font, "Mem: " + memInfo, 2, y, memColor, false);
+                y += 10;
+            }
             
             // Entities
             graphics.drawString(font, "Entities: " + entitiesRendered, 2, y, 0xAAAAAA, false);
@@ -59,15 +69,23 @@ public class PerformanceMonitor {
             graphics.drawString(font, "Particles: " + particlesActive, 2, y, 0xAAAAAA, false);
             y += 10;
             
-            // Chunks
-            graphics.drawString(font, "Chunks: " + chunksRendered, 2, y, 0xAAAAAA, false);
+            // Render Distance
+            int rd = mc.options.renderDistance().get();
+            graphics.drawString(font, "RD: " + rd + " chunks", 2, y, 0xAAAAAA, false);
+            y += 10;
         }
     }
     
     private int getFPSColor(int fps) {
         if (fps >= 60) return 0x00FF00; // Green
-        if (fps >= 30) return 0xFFFF00; // Yellow
-        if (fps >= 15) return 0xFF8800; // Orange
+        if (fps >= 45) return 0xFFFF00; // Yellow
+        if (fps >= 30) return 0xFF8800; // Orange
+        return 0xFF0000; // Red
+    }
+    
+    private int getMemoryColor(int percent) {
+        if (percent < 70) return 0x00FF00; // Green
+        if (percent < 85) return 0xFFFF00; // Yellow
         return 0xFF0000; // Red
     }
     
