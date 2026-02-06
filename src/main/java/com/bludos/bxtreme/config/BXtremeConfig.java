@@ -14,7 +14,7 @@ public class BXtremeConfig {
     public boolean showFPSOverlay = true;
     public boolean showDetailedStats = false;
     
-    // Greedy Meshing
+    // Greedy Meshing (disabled until properly implemented)
     public boolean enableGreedyMeshing = false;
     public int greedyMeshMaxSize = 16;
     public boolean aggressiveFaceCulling = false;
@@ -29,32 +29,49 @@ public class BXtremeConfig {
     public boolean disableSmoothLighting = false;
     public int entityTickDistance = 5;
     
-    // === FILAMENT POST-PROCESSING ===
+    // Translation Layer Optimizations
+    public boolean disableFog = false;
+    public boolean disablePostProcessing = false;
+    public boolean disableEntityShaders = false;
+    public boolean minimizeTextureBinds = false;
+    
+    // === CUSTOM POST-PROCESSING (LWJGL-based) ===
     
     // General
-    public boolean enableFilament = true;
-    public boolean filamentPostProcessing = true;
+    public boolean enableCustomPostProcessing = false; // Master switch
     
-    // Bloom
+    // Bloom (Glow Effect)
     public boolean bloomEnabled = false;
     public int bloomStrength = 10; // 0-100
+    public int bloomRadius = 2; // 1-5 pixels
     
-    // Ambient Occlusion
-    public boolean ambientOcclusionEnabled = true;
-    public int aoQuality = 1; // 0=Low, 1=Medium, 2=High
+    // Vignette (Dark Edges)
+    public boolean vignetteEnabled = false;
+    public int vignetteStrength = 40; // 0-100
     
-    // Depth of Field
-    public boolean depthOfFieldEnabled = false;
-    public int dofFocusDistance = 10; // blocks
-    public int dofBlurAmount = 50; // 0-100
+    // Color Grading
+    public boolean colorGradingEnabled = false;
+    public int brightness = 100; // 50-150 (100 = normal)
+    public int contrast = 100; // 50-150 (100 = normal)
+    public int saturation = 100; // 0-200 (100 = normal, 0 = grayscale)
     
-    // Anti-Aliasing
-    public int antiAliasing = 1; // 0=None, 1=FXAA, 2=MSAA
+    // Sharpening
+    public boolean sharpenEnabled = false;
+    public int sharpenAmount = 50; // 0-100
     
-    // Shadow Quality
-    public int shadowQuality = 1; // 0=Off, 1=Low, 2=Medium, 3=High
+    // Film Grain
+    public boolean filmGrainEnabled = false;
+    public int grainStrength = 30; // 0-100
     
-    // Dynamic Resolution (maintains FPS)
-    public boolean dynamicResolution = true;
-    public int minResolutionScale = 50; // 50-100%
+    // Chromatic Aberration
+    public boolean chromaticAberrationEnabled = false;
+    public int aberrationStrength = 20; // 0-100
+    
+    // Ambient Occlusion (Screen Space)
+    public boolean ssaoEnabled = false;
+    public int ssaoQuality = 1; // 0=Low, 1=Medium, 2=High
+    public int ssaoRadius = 2; // blocks
+    
+    // Advanced
+    public boolean ultraLowQualityMode = false;
 }
