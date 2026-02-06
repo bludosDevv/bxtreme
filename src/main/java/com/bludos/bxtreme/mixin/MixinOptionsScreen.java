@@ -18,19 +18,42 @@ public class MixinOptionsScreen extends Screen {
     }
     
     /**
-     * Add BXtreme button at BOTTOM next to Done button
+     * Add BXtreme button at BOTTOM - perfectly aligned with Done button
+     * Layout: [BXtreme Performance] [Done]
      */
     @Inject(method = "init", at = @At("RETURN"))
     private void addBXtremeButton(CallbackInfo ci) {
-        // Position: Bottom of screen, left side (Done is on right)
+        // Bottom Y position (same as Done button)
         int bottomY = this.height - 27;
+        
+        // Button dimensions - make them equal width and fit nicely
+        int buttonWidth = 150;
+        int gap = 10; // Gap between buttons
+        
+        // Calculate positions to center both buttons
+        int totalWidth = (buttonWidth * 2) + gap;
+        int startX = (this.width - totalWidth) / 2;
         
         // BXtreme button on LEFT
         this.addRenderableWidget(Button.builder(
             Component.literal("BXtreme Performance"),
             btn -> this.minecraft.setScreen(new BXtremeVideoSettingsScreen(this))
-        ).bounds(this.width / 2 - 155, bottomY, 150, 20).build());
+        ).bounds(startX, bottomY, buttonWidth, 20).build());
         
-        // Done button is already on RIGHT by vanilla at (width/2 + 5, bottomY)
+        // Done button on RIGHT (we need to move it)
+        // First, remove the existing Done button
+        this.children().removeIf(widget -> {
+            if (widget instanceof Button btn) {
+                String msg = btn.getMessage().getString();
+                return msg.contains("Done") || msg.contains("done");
+            }
+            return false;
+        });
+        
+        // Add new Done button in correct position
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Done"),
+            btn -> this.minecraft.setScreen(null)
+        ).bounds(startX + buttonWidth + gap, bottomY, buttonWidth, 20).build());
     }
 }

@@ -1,7 +1,5 @@
 package com.bludos.bxtreme.config;
 
-public class BXtremeConfig package com.bludos.bxtreme.config;
-
 public class BXtremeConfig {
     // Entity Rendering
     public boolean aggressiveEntityCulling = true;
