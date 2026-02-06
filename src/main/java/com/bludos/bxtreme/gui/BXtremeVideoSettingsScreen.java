@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SODIUM-STYLE UI - Professional Settings Screen
- * Categories on left, settings on right
+ * COMPLETE BXtreme Settings GUI
+ * Sodium-style with all post-processing effects
  */
 public class BXtremeVideoSettingsScreen extends Screen {
     
@@ -32,6 +32,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
         GENERAL("General"),
         QUALITY("Quality"),
         PERFORMANCE("Performance"),
+        POST_PROCESSING("Post Processing"),
         ADVANCED("Advanced");
         
         final String name;
@@ -41,7 +42,6 @@ public class BXtremeVideoSettingsScreen extends Screen {
     private Category currentCategory = Category.PERFORMANCE;
     private EditBox searchBox;
     
-    // Preset system
     private static final String[] PRESETS = {"ULTRA LOW", "LOW", "MEDIUM", "HIGH", "CUSTOM"};
     private int currentPreset = 4;
     
@@ -61,18 +61,13 @@ public class BXtremeVideoSettingsScreen extends Screen {
         categoryButtons.clear();
         settingButtons.clear();
         
-        // Search bar at top
+        // Search bar
         searchBox = new EditBox(this.font, this.width / 2 - 100, 10, 200, 20, Component.literal("Search..."));
         searchBox.setHint(Component.literal("Search options..."));
         addRenderableWidget(searchBox);
         
-        // Build sidebar categories
         buildSidebar();
-        
-        // Build content area
         buildContentArea();
-        
-        // Bottom buttons
         buildBottomButtons();
     }
     
@@ -105,219 +100,285 @@ public class BXtremeVideoSettingsScreen extends Screen {
         
         switch (currentCategory) {
             case GENERAL:
-                // Preset Selector
-                addSettingButton(
-                    "Preset: " + PRESETS[currentPreset],
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        currentPreset = (currentPreset + 1) % PRESETS.length;
-                        if (currentPreset < 4) applyPreset(currentPreset);
-                        this.rebuildWidgets();
-                    }
-                );
+                // Preset
+                addSetting("Preset: " + PRESETS[currentPreset], CONTENT_X, y, buttonWidth, btn -> {
+                    currentPreset = (currentPreset + 1) % PRESETS.length;
+                    if (currentPreset < 4) applyPreset(currentPreset);
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 // FPS Overlay
-                addSettingButton(
-                    "FPS Overlay: " + (config.showFPSOverlay ? "ON" : "OFF"),
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        config.showFPSOverlay = !config.showFPSOverlay;
-                        Main.config.save();
-                        this.rebuildWidgets();
-                    }
-                );
+                addSetting("FPS Overlay: " + (config.showFPSOverlay ? "ON" : "OFF"), 
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.showFPSOverlay = !config.showFPSOverlay;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 // Detailed Stats
-                addSettingButton(
-                    "Show Detailed Stats: " + (config.showDetailedStats ? "ON" : "OFF"),
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        config.showDetailedStats = !config.showDetailedStats;
-                        Main.config.save();
-                        this.rebuildWidgets();
-                    }
-                );
+                addSetting("Detailed Stats: " + (config.showDetailedStats ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.showDetailedStats = !config.showDetailedStats;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 break;
                 
             case QUALITY:
-                // Graphics Mode
-                String graphicsName = Minecraft.getInstance().options.graphicsMode().get().toString();
-                addSettingButton(
-                    "Graphics: " + graphicsName,
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        int current = Minecraft.getInstance().options.graphicsMode().get().getId();
-                        int next = (current + 1) % 3;
-                        Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.byId(next));
-                        currentPreset = 4;
-                        this.rebuildWidgets();
-                    }
-                );
+                // Graphics
+                String gfx = Minecraft.getInstance().options.graphicsMode().get().toString();
+                addSetting("Graphics: " + gfx, CONTENT_X, y, buttonWidth, btn -> {
+                    int c = Minecraft.getInstance().options.graphicsMode().get().getId();
+                    Minecraft.getInstance().options.graphicsMode().set(
+                        net.minecraft.client.GraphicsStatus.byId((c + 1) % 3));
+                    currentPreset = 4;
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 // Smooth Lighting
-                boolean smoothLight = Minecraft.getInstance().options.ambientOcclusion().get();
-                addSettingButton(
-                    "Smooth Lighting: " + (smoothLight ? "ON" : "OFF"),
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        Minecraft.getInstance().options.ambientOcclusion().set(!smoothLight);
-                        config.disableSmoothLighting = !smoothLight;
-                        currentPreset = 4;
-                        Main.config.save();
-                        this.rebuildWidgets();
-                    }
-                );
+                boolean smooth = Minecraft.getInstance().options.ambientOcclusion().get();
+                addSetting("Smooth Lighting: " + (smooth ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    Minecraft.getInstance().options.ambientOcclusion().set(!smooth);
+                    config.disableSmoothLighting = !smooth;
+                    currentPreset = 4;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 // Entity Shadows
                 boolean shadows = Minecraft.getInstance().options.entityShadows().get();
-                addSettingButton(
-                    "Entity Shadows: " + (shadows ? "ON" : "OFF"),
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        Minecraft.getInstance().options.entityShadows().set(!shadows);
-                        currentPreset = 4;
-                        this.rebuildWidgets();
-                    }
-                );
+                addSetting("Entity Shadows: " + (shadows ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    Minecraft.getInstance().options.entityShadows().set(!shadows);
+                    currentPreset = 4;
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 // Greedy Meshing
-                addSettingButton(
-                    "Greedy Meshing: " + (config.enableGreedyMeshing ? "ON" : "OFF"),
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        config.enableGreedyMeshing = !config.enableGreedyMeshing;
-                        currentPreset = 4;
-                        Main.config.save();
-                        this.rebuildWidgets();
-                    }
-                );
+                addSetting("Greedy Meshing: " + (config.enableGreedyMeshing ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.enableGreedyMeshing = !config.enableGreedyMeshing;
+                    currentPreset = 4;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 break;
                 
             case PERFORMANCE:
                 // Render Distance
-                int renderDist = Minecraft.getInstance().options.renderDistance().get();
-                addSettingButton(
-                    "Render Distance: " + renderDist,
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        int newVal = (renderDist % 16) + 2;
-                        Minecraft.getInstance().options.renderDistance().set(newVal);
-                        currentPreset = 4;
-                        this.rebuildWidgets();
-                    }
-                );
+                int rd = Minecraft.getInstance().options.renderDistance().get();
+                addSetting("Render Distance: " + rd, CONTENT_X, y, buttonWidth, btn -> {
+                    int newVal = (rd % 16) + 2;
+                    Minecraft.getInstance().options.renderDistance().set(newVal);
+                    currentPreset = 4;
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 // Entity Distance
-                addSettingButton(
-                    "Entity Distance: " + config.maxEntityRenderDistance,
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        int[] vals = {16, 24, 32, 48, 64};
-                        int idx = 0;
-                        for (int i = 0; i < vals.length; i++) {
-                            if (vals[i] == config.maxEntityRenderDistance) idx = i;
-                        }
-                        config.maxEntityRenderDistance = vals[(idx + 1) % vals.length];
-                        currentPreset = 4;
-                        Main.config.save();
-                        this.rebuildWidgets();
+                addSetting("Entity Distance: " + config.maxEntityRenderDistance,
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    int[] vals = {16, 24, 32, 48, 64};
+                    int idx = 0;
+                    for (int i = 0; i < vals.length; i++) {
+                        if (vals[i] == config.maxEntityRenderDistance) idx = i;
                     }
-                );
+                    config.maxEntityRenderDistance = vals[(idx + 1) % vals.length];
+                    currentPreset = 4;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
-                // Particle Limit
-                addSettingButton(
-                    "Particle Limit: " + config.particleLimit,
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        int[] vals = {10, 50, 100, 500, 1000};
-                        int idx = 0;
-                        for (int i = 0; i < vals.length; i++) {
-                            if (vals[i] == config.particleLimit) idx = i;
-                        }
-                        config.particleLimit = vals[(idx + 1) % vals.length];
-                        currentPreset = 4;
-                        Main.config.save();
-                        this.rebuildWidgets();
+                // Particles
+                addSetting("Particle Limit: " + config.particleLimit,
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    int[] vals = {10, 50, 100, 250, 500, 1000};
+                    int idx = 0;
+                    for (int i = 0; i < vals.length; i++) {
+                        if (vals[i] == config.particleLimit) idx = i;
                     }
-                );
+                    config.particleLimit = vals[(idx + 1) % vals.length];
+                    currentPreset = 4;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 // Chunk Updates
-                addSettingButton(
-                    "Chunk Updates/Frame: " + config.chunkUpdateBudget,
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        config.chunkUpdateBudget = (config.chunkUpdateBudget % 10) + 1;
-                        currentPreset = 4;
+                addSetting("Chunk Updates/Frame: " + config.chunkUpdateBudget,
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.chunkUpdateBudget = (config.chunkUpdateBudget % 10) + 1;
+                    currentPreset = 4;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                // Max FPS
+                addSetting("Max Framerate: " + config.maxFramerate,
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    int[] vals = {30, 60, 90, 120, 144, 240};
+                    int idx = 0;
+                    for (int i = 0; i < vals.length; i++) {
+                        if (vals[i] == config.maxFramerate) idx = i;
+                    }
+                    config.maxFramerate = vals[(idx + 1) % vals.length];
+                    currentPreset = 4;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                break;
+                
+            case POST_PROCESSING:
+                // Master Switch
+                addSetting("Post-Processing: " + (config.enableCustomPostProcessing ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.enableCustomPostProcessing = !config.enableCustomPostProcessing;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                // Bloom
+                addSetting("Bloom: " + (config.bloomEnabled ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.bloomEnabled = !config.bloomEnabled;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                if (config.bloomEnabled) {
+                    addSetting("  Bloom Strength: " + config.bloomStrength + "%",
+                        CONTENT_X, y, buttonWidth, btn -> {
+                        config.bloomStrength = (config.bloomStrength + 10) % 110;
                         Main.config.save();
                         this.rebuildWidgets();
-                    }
-                );
+                    });
+                    y += spacing;
+                }
+                
+                // Vignette
+                addSetting("Vignette: " + (config.vignetteEnabled ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.vignetteEnabled = !config.vignetteEnabled;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                if (config.vignetteEnabled) {
+                    addSetting("  Vignette Strength: " + config.vignetteStrength + "%",
+                        CONTENT_X, y, buttonWidth, btn -> {
+                        config.vignetteStrength = (config.vignetteStrength + 10) % 110;
+                        Main.config.save();
+                        this.rebuildWidgets();
+                    });
+                    y += spacing;
+                }
+                
+                // Color Grading
+                addSetting("Color Grading: " + (config.colorGradingEnabled ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.colorGradingEnabled = !config.colorGradingEnabled;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                if (config.colorGradingEnabled) {
+                    addSetting("  Brightness: " + config.brightness,
+                        CONTENT_X, y, buttonWidth, btn -> {
+                        config.brightness = ((config.brightness - 50 + 10) % 110) + 50;
+                        Main.config.save();
+                        this.rebuildWidgets();
+                    });
+                    y += spacing;
+                    
+                    addSetting("  Contrast: " + config.contrast,
+                        CONTENT_X, y, buttonWidth, btn -> {
+                        config.contrast = ((config.contrast - 50 + 10) % 110) + 50;
+                        Main.config.save();
+                        this.rebuildWidgets();
+                    });
+                    y += spacing;
+                    
+                    addSetting("  Saturation: " + config.saturation,
+                        CONTENT_X, y, buttonWidth, btn -> {
+                        config.saturation = (config.saturation + 10) % 210;
+                        Main.config.save();
+                        this.rebuildWidgets();
+                    });
+                    y += spacing;
+                }
+                
+                // Sharpening
+                addSetting("Sharpening: " + (config.sharpenEnabled ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.sharpenEnabled = !config.sharpenEnabled;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                // SSAO
+                addSetting("Ambient Occlusion: " + (config.ssaoEnabled ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.ssaoEnabled = !config.ssaoEnabled;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 break;
                 
             case ADVANCED:
-                // Max FPS
-                addSettingButton(
-                    "Max Framerate: " + config.maxFramerate,
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        int[] vals = {30, 60, 90, 120, 144, 240};
-                        int idx = 0;
-                        for (int i = 0; i < vals.length; i++) {
-                            if (vals[i] == config.maxFramerate) idx = i;
-                        }
-                        config.maxFramerate = vals[(idx + 1) % vals.length];
-                        currentPreset = 4;
-                        Main.config.save();
-                        this.rebuildWidgets();
-                    }
-                );
-                y += spacing;
-                
                 // Ultra Low Mode
-                addSettingButton(
-                    "Ultra Low Mode: " + (config.ultraLowQualityMode ? "ON" : "OFF"),
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        config.ultraLowQualityMode = !config.ultraLowQualityMode;
-                        currentPreset = 4;
-                        Main.config.save();
-                        this.rebuildWidgets();
-                    }
-                );
+                addSetting("Ultra Low Mode: " + (config.ultraLowQualityMode ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.ultraLowQualityMode = !config.ultraLowQualityMode;
+                    currentPreset = 4;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
-                // Async Chunk Building
-                addSettingButton(
-                    "Async Chunks: " + (config.asyncChunkBuilding ? "ON" : "OFF"),
-                    CONTENT_X, y, buttonWidth,
-                    btn -> {
-                        config.asyncChunkBuilding = !config.asyncChunkBuilding;
-                        currentPreset = 4;
-                        Main.config.save();
-                        this.rebuildWidgets();
-                    }
-                );
+                // Disable Fog
+                addSetting("Disable Fog: " + (config.disableFog ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.disableFog = !config.disableFog;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
+                y += spacing;
+                
+                // Entity Culling
+                addSetting("Entity Culling: " + (config.aggressiveEntityCulling ? "ON" : "OFF"),
+                    CONTENT_X, y, buttonWidth, btn -> {
+                    config.aggressiveEntityCulling = !config.aggressiveEntityCulling;
+                    Main.config.save();
+                    this.rebuildWidgets();
+                });
                 y += spacing;
                 
                 break;
         }
     }
     
-    private void addSettingButton(String text, int x, int y, int width, Button.OnPress onPress) {
+    private void addSetting(String text, int x, int y, int width, Button.OnPress onPress) {
         Button btn = Button.builder(Component.literal(text), onPress)
             .bounds(x, y, width, 20)
             .build();
@@ -330,13 +391,11 @@ public class BXtremeVideoSettingsScreen extends Screen {
         int buttonWidth = 100;
         int gap = 10;
         
-        // Apply button
         addRenderableWidget(Button.builder(
             Component.literal("Apply"),
             btn -> Main.config.save()
         ).bounds(this.width / 2 - buttonWidth - gap / 2, bottomY, buttonWidth, 20).build());
         
-        // Done button
         addRenderableWidget(Button.builder(
             Component.literal("Done"),
             btn -> {
@@ -355,6 +414,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.ultraLowQualityMode = false;
                 config.enableGreedyMeshing = true;
                 config.maxFramerate = 60;
+                config.enableCustomPostProcessing = false;
                 Minecraft.getInstance().options.renderDistance().set(2);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FAST);
                 Minecraft.getInstance().options.entityShadows().set(false);
@@ -367,6 +427,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.ultraLowQualityMode = false;
                 config.enableGreedyMeshing = true;
                 config.maxFramerate = 90;
+                config.enableCustomPostProcessing = false;
                 Minecraft.getInstance().options.renderDistance().set(4);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FAST);
                 Minecraft.getInstance().options.entityShadows().set(false);
@@ -377,8 +438,10 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.particleLimit = 100;
                 config.chunkUpdateBudget = 3;
                 config.ultraLowQualityMode = false;
-                config.enableGreedyMeshing = true;
+                config.enableGreedyMeshing = false;
                 config.maxFramerate = 120;
+                config.enableCustomPostProcessing = true;
+                config.bloomEnabled = true;
                 Minecraft.getInstance().options.renderDistance().set(6);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FANCY);
                 Minecraft.getInstance().options.entityShadows().set(true);
@@ -391,6 +454,10 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.ultraLowQualityMode = false;
                 config.enableGreedyMeshing = false;
                 config.maxFramerate = 144;
+                config.enableCustomPostProcessing = true;
+                config.bloomEnabled = true;
+                config.vignetteEnabled = true;
+                config.ssaoEnabled = true;
                 Minecraft.getInstance().options.renderDistance().set(10);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FANCY);
                 Minecraft.getInstance().options.entityShadows().set(true);
@@ -404,18 +471,13 @@ public class BXtremeVideoSettingsScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
         
-        // Draw sidebar background (dark)
         graphics.fill(0, 35, SIDEBAR_WIDTH + 15, this.height - 35, 0xDD000000);
-        
-        // Draw content area background (lighter)
         graphics.fill(CONTENT_X - 5, 35, this.width - 5, this.height - 35, 0x88000000);
         
-        // Draw category title
         graphics.drawString(this.font, currentCategory.name, CONTENT_X, TOP_Y - 20, 0xFFFFFF);
         
         super.render(graphics, mouseX, mouseY, partialTick);
         
-        // FPS counter
         if (Main.performanceMonitor != null) {
             int fps = Main.performanceMonitor.getFPS();
             int color = fps >= 60 ? 0x00FF00 : fps >= 30 ? 0xFFFF00 : 0xFF0000;
