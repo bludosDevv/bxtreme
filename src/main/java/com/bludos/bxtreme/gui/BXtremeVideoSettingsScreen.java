@@ -13,20 +13,8 @@ public class BXtremeVideoSettingsScreen extends Screen {
     private final Screen lastScreen;
     private BXtremeConfig config;
     
-    private enum Category {
-        PERFORMANCE("Performance"),
-        QUALITY("Quality"),
-        DETAILS("Details"),
-        OTHER("Other");
-        
-        final String name;
-        Category(String name) { this.name = name; }
-    }
-    
-    private Category currentCategory = Category.PERFORMANCE;
-    
     private static final String[] PRESETS = {"ULTRA LOW", "LOW", "MEDIUM", "HIGH", "CUSTOM"};
-    private int currentPreset = 4; // CUSTOM
+    private int currentPreset = 4;
     
     public BXtremeVideoSettingsScreen(Screen lastScreen) {
         super(Component.literal("BXtreme Performance"));
@@ -50,7 +38,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
             btn -> {}
         ).bounds(centerX - 100, 10, 200, 20).build());
         
-        // Preset selector
+        // Preset
         addRenderableWidget(Button.builder(
             Component.literal("Preset: " + PRESETS[currentPreset]),
             btn -> {
@@ -61,8 +49,6 @@ public class BXtremeVideoSettingsScreen extends Screen {
         ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
         y += spacing;
         
-        // === PERFORMANCE SETTINGS ===
-        
         // Render Distance
         int renderDist = Minecraft.getInstance().options.renderDistance().get();
         addRenderableWidget(Button.builder(
@@ -71,6 +57,18 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 int newVal = (renderDist % 16) + 2;
                 Minecraft.getInstance().options.renderDistance().set(newVal);
                 currentPreset = 4;
+                this.rebuildWidgets();
+            }
+        ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
+        y += spacing;
+        
+        // GREEDY MESHING - NEW!
+        addRenderableWidget(Button.builder(
+            Component.literal("Greedy Meshing: " + (config.enableGreedyMeshing ? "ON" : "OFF")),
+            btn -> {
+                config.enableGreedyMeshing = !config.enableGreedyMeshing;
+                currentPreset = 4;
+                Main.config.save();
                 this.rebuildWidgets();
             }
         ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
@@ -93,7 +91,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
         ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
         y += spacing;
         
-        // Particle Limit
+        // Particles
         addRenderableWidget(Button.builder(
             Component.literal("Particles: " + config.particleLimit),
             btn -> {
@@ -110,7 +108,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
         ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
         y += spacing;
         
-        // Graphics Mode
+        // Graphics
         String graphicsName = Minecraft.getInstance().options.graphicsMode().get().toString();
         addRenderableWidget(Button.builder(
             Component.literal("Graphics: " + graphicsName),
@@ -150,18 +148,6 @@ public class BXtremeVideoSettingsScreen extends Screen {
         ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
         y += spacing;
         
-        // Ultra Low Mode
-        addRenderableWidget(Button.builder(
-            Component.literal("Ultra Low Mode: " + (config.ultraLowQualityMode ? "ON" : "OFF")),
-            btn -> {
-                config.ultraLowQualityMode = !config.ultraLowQualityMode;
-                currentPreset = 4;
-                Main.config.save();
-                this.rebuildWidgets();
-            }
-        ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
-        y += spacing;
-        
         // FPS Overlay
         addRenderableWidget(Button.builder(
             Component.literal("FPS Overlay: " + (config.showFPSOverlay ? "ON" : "OFF")),
@@ -173,7 +159,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
         ).bounds(centerX - buttonWidth / 2, y, buttonWidth, 20).build());
         y += spacing + 10;
         
-        // Done button
+        // Done
         addRenderableWidget(Button.builder(
             Component.literal("Done"),
             btn -> {
@@ -189,7 +175,8 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.maxEntityRenderDistance = 16;
                 config.particleLimit = 10;
                 config.chunkUpdateBudget = 1;
-                config.ultraLowQualityMode = false; // DISABLE ultra low - it causes invisible blocks
+                config.ultraLowQualityMode = false;
+                config.enableGreedyMeshing = true; // Enable for max FPS
                 config.maxFramerate = 60;
                 Minecraft.getInstance().options.renderDistance().set(2);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FAST);
@@ -201,6 +188,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.particleLimit = 50;
                 config.chunkUpdateBudget = 2;
                 config.ultraLowQualityMode = false;
+                config.enableGreedyMeshing = true;
                 config.maxFramerate = 90;
                 Minecraft.getInstance().options.renderDistance().set(4);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FAST);
@@ -212,6 +200,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.particleLimit = 100;
                 config.chunkUpdateBudget = 3;
                 config.ultraLowQualityMode = false;
+                config.enableGreedyMeshing = true;
                 config.maxFramerate = 120;
                 Minecraft.getInstance().options.renderDistance().set(6);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FANCY);
@@ -223,6 +212,7 @@ public class BXtremeVideoSettingsScreen extends Screen {
                 config.particleLimit = 500;
                 config.chunkUpdateBudget = 5;
                 config.ultraLowQualityMode = false;
+                config.enableGreedyMeshing = false; // Disable for quality
                 config.maxFramerate = 144;
                 Minecraft.getInstance().options.renderDistance().set(10);
                 Minecraft.getInstance().options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FANCY);
@@ -243,6 +233,10 @@ public class BXtremeVideoSettingsScreen extends Screen {
             int fps = Main.performanceMonitor.getFPS();
             graphics.drawString(this.font, "FPS: " + fps, 10, this.height - 15, 0xFFFFFF);
         }
+        
+        // Info text at bottom
+        graphics.drawString(this.font, "Greedy Meshing = Bedrock-style optimization", 
+            this.width / 2 - 100, this.height - 40, 0xAAAAAA);
     }
     
     @Override

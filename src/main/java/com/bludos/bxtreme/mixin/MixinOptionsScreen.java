@@ -18,14 +18,19 @@ public class MixinOptionsScreen extends Screen {
     }
     
     /**
-     * Add BXtreme button to options menu - SIMPLE approach
+     * Add BXtreme button at BOTTOM next to Done button
      */
     @Inject(method = "init", at = @At("RETURN"))
     private void addBXtremeButton(CallbackInfo ci) {
-        // Add BXtreme button
+        // Position: Bottom of screen, left side (Done is on right)
+        int bottomY = this.height - 27;
+        
+        // BXtreme button on LEFT
         this.addRenderableWidget(Button.builder(
-            Component.literal("BXtreme Performance..."),
+            Component.literal("BXtreme Performance"),
             btn -> this.minecraft.setScreen(new BXtremeVideoSettingsScreen(this))
-        ).bounds(this.width / 2 + 5, this.height / 6 + 48 - 6, 150, 20).build());
+        ).bounds(this.width / 2 - 155, bottomY, 150, 20).build());
+        
+        // Done button is already on RIGHT by vanilla at (width/2 + 5, bottomY)
     }
 }
