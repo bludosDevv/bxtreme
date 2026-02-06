@@ -11,6 +11,7 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 public class RenderEventHandler {
     
     private int tickCounter = 0;
+    private int gcCounter = 0; // Track GC calls
     
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -19,11 +20,16 @@ public class RenderEventHandler {
         }
         
         tickCounter++;
+        gcCounter++;
         
-        // Every 20 ticks (1 second), perform aggressive cleanup
+        // Only do cleanup every 20 ticks (1 second)
         if (tickCounter >= 20) {
             tickCounter = 0;
-            performAggressiveOptimizations();
+            // GC only every 10 seconds instead of every second!
+            if (gcCounter >= 200) {
+                gcCounter = 0;
+                performOptimizations();
+            }
         }
     }
     
@@ -31,7 +37,6 @@ public class RenderEventHandler {
     public void onRenderTick(TickEvent.RenderTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             forceGraphicsSettings();
-            minimizeGLStateChanges();
         }
         
         if (event.phase == TickEvent.Phase.END && Main.performanceMonitor != null) {
@@ -51,65 +56,27 @@ public class RenderEventHandler {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level != null && Main.performanceMonitor != null) {
-                // Count and cull distant entities
                 cullDistantEntities(mc);
             }
         }
     }
     
-    /**
-     * NUCLEAR: Force lowest possible graphics settings
-     */
     private void forceGraphicsSettings() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || !Main.config.get().ultraLowQualityMode) {
             return;
         }
         
-        // Force fast graphics
+        // Apply ultra low settings
         mc.options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FAST);
-        
-        // Disable smooth lighting
         if (Main.config.get().disableSmoothLighting) {
             mc.options.ambientOcclusion().set(false);
         }
-        
-        // Minimize particles
         mc.options.particles().set(net.minecraft.client.ParticleStatus.MINIMAL);
-        
-        // Disable entity shadows
         mc.options.entityShadows().set(false);
-        
-        // Disable clouds
         mc.options.cloudStatus().set(net.minecraft.client.CloudStatus.OFF);
     }
     
-    /**
-     * NUCLEAR: Minimize OpenGL state changes for translation layer
-     */
-    private void minimizeGLStateChanges() {
-        Minecraft mc = Minecraft.getInstance();
-        if (!Main.config.get().ultraLowQualityMode) {
-            return;
-        }
-        
-        // Disable ALL shader-based effects
-        mc.options.graphicsMode().set(net.minecraft.client.GraphicsStatus.FAST);
-        mc.gameRenderer.shutdownEffect(); // Kill post-processing
-        
-        // Minimize cloud rendering (expensive draw calls)
-        mc.options.cloudStatus().set(net.minecraft.client.CloudStatus.OFF);
-        
-        // Disable view bobbing (extra matrix calculations)
-        mc.options.bobView().set(false);
-        
-        // Disable distortion effects
-        mc.gameRenderer.checkEntityPostEffect(null);
-    }
-    
-    /**
-     * NUCLEAR: Aggressively cull distant entities every frame
-     */
     private void cullDistantEntities(Minecraft mc) {
         if (mc.player == null || !Main.config.get().aggressiveEntityCulling) {
             return;
@@ -122,10 +89,8 @@ public class RenderEventHandler {
         for (Entity entity : mc.level.entitiesForRendering()) {
             total++;
             double distSq = entity.distanceToSqr(mc.player);
-            
             if (distSq > maxDist * maxDist) {
                 culled++;
-                // Don't render - this is just for counting
             }
         }
         
@@ -134,27 +99,23 @@ public class RenderEventHandler {
         }
     }
     
-    /**
-     * NUCLEAR: Aggressive memory and optimization cleanup
-     */
-    private void performAggressiveOptimizations() {
+    private void performOptimizations() {
         Minecraft mc = Minecraft.getInstance();
-        
         if (mc.level == null || mc.player == null) {
             return;
         }
         
-        // NUCLEAR garbage collection every second
+        // Only GC if we're actually running low on memory
         Runtime runtime = Runtime.getRuntime();
         long freeMemory = runtime.freeMemory();
         long totalMemory = runtime.totalMemory();
         long maxMemory = runtime.maxMemory();
         
-        // If using more than 70% of max memory, force GC
+        // Only GC if using more than 85% of max memory
         long usedMemory = totalMemory - freeMemory;
-        if (usedMemory > maxMemory * 0.7) {
+        if (usedMemory > maxMemory * 0.85) {
             System.gc();
-            Main.LOGGER.info("NUCLEAR: Forced GC - Memory: " + (usedMemory / 1024 / 1024) + "MB / " + (maxMemory / 1024 / 1024) + "MB");
+            Main.LOGGER.info("Performed GC - Memory: " + (usedMemory / 1024 / 1024) + "MB / " + (maxMemory / 1024 / 1024) + "MB");
         }
     }
 }

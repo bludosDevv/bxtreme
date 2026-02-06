@@ -14,6 +14,8 @@ public class ConfigHandler {
     private static final File CONFIG_FILE = new File("config/bxtreme_config.json");
     
     public BXtremeConfig config;
+    private long lastSaveTime = 0;
+    private static final long SAVE_COOLDOWN = 2000; // 2 seconds between saves
     
     public ConfigHandler() {
         this.config = new BXtremeConfig();
@@ -21,7 +23,7 @@ public class ConfigHandler {
     
     public void load() {
         if (!CONFIG_FILE.exists()) {
-            save(); // Create default config
+            save();
             Main.LOGGER.info("Created default BXtreme config file");
             return;
         }
@@ -36,6 +38,13 @@ public class ConfigHandler {
     }
     
     public void save() {
+        // Prevent spam saving - only save once every 2 seconds
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSaveTime < SAVE_COOLDOWN) {
+            return; // Too soon, skip
+        }
+        lastSaveTime = currentTime;
+        
         try {
             CONFIG_FILE.getParentFile().mkdirs();
             try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
