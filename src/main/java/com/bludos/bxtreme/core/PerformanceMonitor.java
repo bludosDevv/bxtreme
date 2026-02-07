@@ -6,7 +6,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
 /**
- * SIMPLIFIED Performance Monitor
+ * Simple Performance Monitor
  */
 public class PerformanceMonitor {
     private long lastTime = System.nanoTime();
